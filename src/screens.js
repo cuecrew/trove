@@ -6,15 +6,11 @@ function HomeFeedDiary({ onCat, onItem, onAdd, items }) {
   const dayStr = days[now.getDay()].toUpperCase();
   const dateStr = `${months[now.getMonth()].slice(0,3).toUpperCase()} ${now.getDate()}`;
 
-  // Build feed from persisted items + sample
-  const allItems = items.length > 0
-    ? [...items].reverse().slice(0, 10).map(it => ({ ...it, when: new Date(it.loggedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }))
-    : FEED;
+  const allItems = [...items].reverse().slice(0, 10).map(it => ({ ...it, when: new Date(it.loggedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }));
 
   const hero = allItems[0];
   const rest = allItems.slice(1, 5);
 
-  // Group rest by relative date
   const groups = {};
   rest.forEach(it => {
     const g = it.date || 'Earlier';
@@ -22,8 +18,7 @@ function HomeFeedDiary({ onCat, onItem, onAdd, items }) {
     groups[g].push(it);
   });
 
-  // Compute streak
-  const streak = items.length > 0 ? Math.min(items.length, 12) : 12;
+  const streak = items.length;
 
   return (
     <div style={{ height: '100%', background: T.bg, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
@@ -119,10 +114,7 @@ function CategoryScreen({ catKey, onBack, onItem, onAdd, items }) {
   const [filter, setFilter] = React.useState('all');
   const [view, setView] = React.useState('grid');
 
-  // Merge persisted items with sample
-  const persistedForCat = items.filter(it => it.cat === catKey);
-  const sampleForCat = SAMPLE[catKey] || [];
-  const allForCat = persistedForCat.length > 0 ? persistedForCat : sampleForCat;
+  const allForCat = items.filter(it => it.cat === catKey);
 
   const filtered = allForCat.filter(it =>
     filter === 'all' ? true :
@@ -236,7 +228,7 @@ function CategoryScreen({ catKey, onBack, onItem, onAdd, items }) {
 function ShelvesScreen({ onCat, onAdd, items }) {
   const counts = {};
   CAT_ORDER.forEach(k => {
-    counts[k] = items.filter(it => it.cat === k && it.status !== 'want').length || SAMPLE[k].filter(it => it.status !== 'want').length;
+    counts[k] = items.filter(it => it.cat === k && it.status !== 'want').length;
   });
   return (
     <div style={{ height: '100%', background: T.bg, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
@@ -364,16 +356,14 @@ function ProfileScreen({ onAdd, items }) {
     return out;
   }, []);
 
-  const totalLogged = items.length > 0 ? items.length : 142;
-  const avgRating = items.length > 0 ? (items.reduce((a, b) => a + b.rating, 0) / items.length).toFixed(1) : '4.2';
+  const totalLogged = items.length;
+  const avgRating = items.length > 0 ? (items.reduce((a, b) => a + b.rating, 0) / items.length).toFixed(1) : '—';
 
-  // Category counts
   const catCounts = {};
-  CAT_ORDER.forEach(k => { catCounts[k] = items.filter(it => it.cat === k).length || SAMPLE[k].length; });
-  const catTotal = Object.values(catCounts).reduce((a, b) => a + b, 0);
+  CAT_ORDER.forEach(k => { catCounts[k] = items.filter(it => it.cat === k).length; });
+  const catTotal = Object.values(catCounts).reduce((a, b) => a + b, 0) || 1;
 
-  const topRated = items.filter(it => it.rating >= 4.5).slice(0, 5);
-  const topDisplay = topRated.length > 0 ? topRated : [SAMPLE.movies[1], SAMPLE.books[1], SAMPLE.games[2], SAMPLE.tv[1], SAMPLE.travel[0]];
+  const topDisplay = items.filter(it => it.rating >= 4.5).slice(0, 5);
 
   return (
     <div style={{ height: '100%', background: T.bg, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>

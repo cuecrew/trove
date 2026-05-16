@@ -111,13 +111,31 @@ function StepCategory({ onPick }) {
 // Step 1 — Search
 function StepSearch({ cat, onPick }) {
   const [q, setQ] = React.useState('');
+  const [results, setResults] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
   const inputRef = React.useRef(null);
   React.useEffect(() => { const t = setTimeout(() => inputRef.current && inputRef.current.focus(), 260); return () => clearTimeout(t); }, []);
 
+  React.useEffect(() => {
+    let active = true;
+    if (!cat) return;
+    if (!q) {
+      setResults(window.SEARCH_SEEDS[cat] || []);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const t = setTimeout(() => {
+      window.searchAPI(cat, q).then(res => {
+        if (active) { setResults(res); setLoading(false); }
+      });
+    }, 400);
+    return () => { active = false; clearTimeout(t); };
+  }, [q, cat]);
+
   if (!cat) return null;
   const c = CATS[cat];
-  const seeds = SEARCH_SEEDS[cat] || [];
-  const filtered = q ? seeds.filter(s => (s.title + ' ' + (s.sub || '')).toLowerCase().includes(q.toLowerCase())) : seeds;
+  const filtered = results;
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>

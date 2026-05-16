@@ -1,5 +1,5 @@
 // ── Home Feed (Diary) ────────────────────────────────────────────────────────
-function HomeFeedDiary({ onCat, onItem, onAdd, items }) {
+function HomeFeedDiary({ onCat, onItem, onAdd, onMe, items }) {
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const now = new Date();
@@ -32,7 +32,7 @@ function HomeFeedDiary({ onCat, onItem, onAdd, items }) {
               {now.getHours() < 12 ? 'Morning' : now.getHours() < 17 ? 'Afternoon' : 'Evening'}, you
             </div>
           </div>
-          <div style={{ width: 38, height: 38, borderRadius: 19, background: T.surface2, border: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div onClick={onMe} style={{ width: 38, height: 38, borderRadius: 19, background: T.surface2, border: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             <span style={{ fontFamily: '"Bricolage Grotesque"', fontWeight: 700, color: T.brand, fontSize: 14 }}>T</span>
           </div>
         </div>
@@ -341,7 +341,7 @@ function DetailScreen({ item, onBack, onAdd }) {
 }
 
 // ── Profile Screen ───────────────────────────────────────────────────────────
-function ProfileScreen({ onAdd, items }) {
+function ProfileScreen({ onAdd, onSettings, items }) {
   const heat = React.useMemo(() => {
     const out = [];
     for (let w = 0; w < 26; w++) {
@@ -361,6 +361,15 @@ function ProfileScreen({ onAdd, items }) {
 
   const catCounts = {};
   CAT_ORDER.forEach(k => { catCounts[k] = items.filter(it => it.cat === k).length; });
+
+  const streakDays = React.useMemo(() => {
+    if (items.length === 0) return 0;
+    const loggedDates = new Set(items.map(it => new Date(it.loggedAt).toDateString()));
+    let streak = 0;
+    const d = new Date(); d.setHours(0,0,0,0);
+    while (loggedDates.has(d.toDateString())) { streak++; d.setDate(d.getDate() - 1); }
+    return streak;
+  }, [items]);
   const catTotal = Object.values(catCounts).reduce((a, b) => a + b, 0) || 1;
 
   const topDisplay = items.filter(it => it.rating >= 4.5).slice(0, 5);
@@ -371,7 +380,7 @@ function ProfileScreen({ onAdd, items }) {
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 110 }}>
         <div style={{ padding: '8px 20px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ fontFamily: '"Geist"', fontSize: 13, fontWeight: 600, color: T.textDim }}>@you</div>
-          <button style={{ width: 38, height: 38, borderRadius: 19, background: T.surface, border: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button onClick={onSettings} style={{ width: 38, height: 38, borderRadius: 19, background: T.surface, border: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             <Icon name="more" size={18} color={T.textDim} />
           </button>
         </div>
@@ -385,9 +394,9 @@ function ProfileScreen({ onAdd, items }) {
 
         {/* Stats */}
         <div style={{ padding: '0 20px 18px', display: 'flex', gap: 8 }}>
-          <StatCard value={`${catCounts.movies || 38}`} label="Movies" accent={CATS.movies.accent} icon="movies" sub="watched" />
-          <StatCard value={`${avgRating}★`} label="Average" accent={T.brand} icon="star" sub={`across ${totalLogged}`} />
-          <StatCard value="12" label="Streak" accent={CATS.travel.accent} icon="flame" sub="days" />
+          <StatCard value={catCounts.movies} label="Movies" accent={CATS.movies.accent} icon="movies" sub="watched" />
+          <StatCard value={totalLogged > 0 ? `${avgRating}★` : '—'} label="Average" accent={T.brand} icon="star" sub={totalLogged > 0 ? `across ${totalLogged}` : 'no entries yet'} />
+          <StatCard value={streakDays} label="Streak" accent={CATS.travel.accent} icon="flame" sub="days" />
         </div>
 
         {/* Heatmap */}

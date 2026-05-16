@@ -65,12 +65,12 @@ function TroveApp() {
 
   // ── Main app ─────────────────────────────────────────────────────────────
   const renderScreen = () => {
-    if (screen === 'home')         return <HomeFeedDiary onCat={openCat} onItem={openItem} onAdd={goAdd} items={items} />;
+    if (screen === 'home')         return <HomeFeedDiary onCat={openCat} onItem={openItem} onAdd={goAdd} onMe={() => setScreen('me')} items={items} />;
     if (screen === 'shelves-home') return <ShelvesScreen onCat={openCat} onAdd={goAdd} items={items} />;
     if (screen === 'shelves')      return <CategoryScreen catKey={catKey} onBack={goBack} onItem={openItem} onAdd={goAdd} items={items} />;
     if (screen === 'detail')       return <DetailScreen item={item || FEED[0]} onBack={goBack} onAdd={goAdd} />;
     if (screen === 'search')       return <UniversalSearchScreen onBack={goBack} onItem={openItem} onAdd={goAdd} items={items} />;
-    if (screen === 'me')           return <ProfileScreen onAdd={goAdd} items={items} />;
+    if (screen === 'me')           return <ProfileScreen onAdd={goAdd} onSettings={() => setScreen('settings')} items={items} />;
     if (screen === 'settings')     return <SettingsScreen onBack={goBack} />;
     return <HomeFeedDiary onCat={openCat} onItem={openItem} onAdd={goAdd} items={items} />;
   };

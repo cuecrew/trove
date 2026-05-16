@@ -112,7 +112,7 @@ function TabBar({ active = 'home', onNav, onAdd }) {
     { key: 'me',      label: 'You',     icon: 'user' },
   ];
   return (
-    <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingBottom: 22, paddingTop: 8, background: 'linear-gradient(to top, rgba(14,11,9,0.96) 60%, rgba(14,11,9,0))', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', zIndex: 30 }}>
+    <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingBottom: 'max(env(safe-area-inset-bottom), 22px)', paddingTop: 8, background: 'linear-gradient(to top, rgba(14,11,9,0.96) 60%, rgba(14,11,9,0))', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', zIndex: 30 }}>
       {tabs.map(t => {
         if (t.fab) return (
           <button key={t.key} onClick={onAdd} style={{ width: 56, height: 56, borderRadius: 28, background: T.brand, border: 'none', cursor: 'pointer', boxShadow: `0 6px 20px rgba(244,178,60,0.4), inset 0 -3px 0 ${T.brandDeep}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
@@ -157,26 +157,12 @@ function SectionHead({ kicker, title, action, color, onAction }) {
   );
 }
 
-function StatusBar({ time }) {
-  const now = new Date();
-  const t = time || `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-  return (
-    <div style={{ height: 54, padding: '15px 28px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#fff', fontFamily: '-apple-system, system-ui', position: 'relative', zIndex: 20, flexShrink: 0 }}>
-      <span style={{ fontSize: 16, fontWeight: 600, letterSpacing: -0.3 }}>{t}</span>
-      <span style={{ width: 110 }} />
-      <span style={{ display: 'inline-flex', gap: 5, alignItems: 'center' }}>
-        <svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="6" width="3" height="5" rx="0.5" fill="#fff"/><rect x="4.5" y="4" width="3" height="7" rx="0.5" fill="#fff"/><rect x="9" y="2" width="3" height="9" rx="0.5" fill="#fff"/><rect x="13.5" y="0" width="3" height="11" rx="0.5" fill="#fff"/></svg>
-        <svg width="15" height="11" viewBox="0 0 15 11"><path d="M7.5 2.8a5.8 5.8 0 014.1 1.7l1-1a7.2 7.2 0 00-10.2 0l1 1A5.8 5.8 0 017.5 2.8zm0 3.2a2.6 2.6 0 011.8.75l1-1a4 4 0 00-5.6 0l1 1A2.6 2.6 0 017.5 6zm0 3.2a1 1 0 100 2 1 1 0 000-2z" fill="#fff"/></svg>
-        <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="#fff" strokeOpacity=".5"/><rect x="2" y="2" width="18" height="8" rx="1.6" fill="#fff"/><path d="M23 4v4c.7-.2 1.2-1 1.2-2s-.5-1.8-1.2-2z" fill="#fff" fillOpacity=".5"/></svg>
-      </span>
-    </div>
-  );
+function StatusBar() {
+  return <div style={{ height: 'max(env(safe-area-inset-top), 44px)', flexShrink: 0 }} />;
 }
 
 function HomeIndicator() {
-  return (
-    <div style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', width: 139, height: 5, borderRadius: 100, background: 'rgba(255,255,255,0.25)', zIndex: 100, pointerEvents: 'none' }} />
-  );
+  return null;
 }
 
 function DiaryRow({ item, onClick }) {

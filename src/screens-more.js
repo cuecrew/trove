@@ -74,25 +74,42 @@ function OnboardingPickCategories({ onContinue }) {
 function UniversalSearchScreen({ onBack, onItem, onAdd, items }) {
   const [q, setQ] = React.useState('');
   const [catFilter, setCatFilter] = React.useState('all');
+  const [extResults, setExtResults] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
   const inputRef = React.useRef(null);
   React.useEffect(() => { setTimeout(() => inputRef.current && inputRef.current.focus(), 120); }, []);
 
-  const ALL = [];
-  CAT_ORDER.forEach(k => {
-    (SEARCH_SEEDS[k] || []).forEach(r => ALL.push({ ...r, cat: k }));
-    (SAMPLE[k] || []).forEach(r => ALL.push({ ...r }));
-  });
-  items.forEach(it => ALL.push({ ...it }));
+  React.useEffect(() => {
+    let active = true;
+    if (!q) { setExtResults([]); setLoading(false); return; }
+    setLoading(true);
+    const t = setTimeout(() => {
+      const catsToSearch = catFilter === 'all' ? CAT_ORDER : [catFilter];
+      Promise.all(catsToSearch.map(c => window.searchAPI(c, q).then(res => res.map(r => ({...r, cat: c})))))
+        .then(arrays => {
+          if (!active) return;
+          setExtResults([].concat(...arrays));
+          setLoading(false);
+        });
+    }, 400);
+    return () => { active = false; clearTimeout(t); };
+  }, [q, catFilter]);
 
-  const filtered = q
-    ? ALL.filter(r => {
+  const filteredPersonal = q
+    ? items.filter(r => {
         const match = (r.title + ' ' + (r.sub || '')).toLowerCase().includes(q.toLowerCase());
         return catFilter === 'all' ? match : match && r.cat === catFilter;
       })
     : [];
 
   const grouped = {};
-  filtered.forEach(r => { (grouped[r.cat] = grouped[r.cat] || []).push(r); });
+  const dedupe = new Set();
+  
+  [...filteredPersonal, ...extResults].forEach(r => {
+    if (dedupe.has(r.id)) return;
+    dedupe.add(r.id);
+    (grouped[r.cat] = grouped[r.cat] || []).push(r);
+  });
 
   const recentSearches = ['Dune Part Two', 'Tomorrow & Tomorrow', 'Kyoto', 'Severance'];
 

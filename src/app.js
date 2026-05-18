@@ -97,10 +97,11 @@ function TroveApp() {
   const [onboardStep, setOnboardStep] = React.useState(0);
 
   // ── Navigation ──────────────────────────────────────────────────────────
-  const [screen, setScreen]   = React.useState('home');
-  const [catKey, setCatKey]   = React.useState('movies');
-  const [item, setItem]       = React.useState(null);
-  const [prevScreen, setPrev] = React.useState('home');
+  const [screen, setScreen]     = React.useState('home');
+  const [catKey, setCatKey]     = React.useState('movies');
+  const [item, setItem]         = React.useState(null);
+  const [prevScreen, setPrev]   = React.useState('home');
+  const [selectedList, setList] = React.useState(null);
 
   // ── Quick-add & toast ───────────────────────────────────────────────────
   const [adding, setAdding]   = React.useState(false);
@@ -132,10 +133,15 @@ function TroveApp() {
     }
   };
 
-  const openCat = k => { setCatKey(k); setPrev(screen); setScreen('shelves'); };
-  const openItem = it => { setItem(it); setPrev(screen); setScreen('detail'); };
-  const goBack = () => setScreen(prevScreen === screen ? 'home' : prevScreen);
-  const goAdd = () => setAdding(true);
+  // ── Handlers ────────────────────────────────────────────────────────────
+  const openCat     = k    => { setCatKey(k); setPrev(screen); setScreen('shelves'); };
+  const openItem    = it   => { setItem(it); setPrev(screen); setScreen('detail'); };
+  const openList    = list => { setList(list); setPrev(screen); setScreen('list-detail'); };
+  const goBack      = ()   => setScreen(prevScreen === screen ? 'home' : prevScreen);
+  const goAdd       = ()   => setAdding(true);
+  const goGoals     = ()   => { setPrev(screen); setScreen('goals'); };
+  const goFriends   = ()   => { setPrev(screen); setScreen('friends'); };
+  const goLists     = ()   => { setPrev(screen); setScreen('lists'); };
 
   const onSaved = (entry) => {
     setAdding(false);
@@ -168,14 +174,18 @@ function TroveApp() {
   }
 
   const renderScreen = () => {
-    if (screen === 'home')         return <HomeFeedDiary onCat={openCat} onItem={openItem} onAdd={goAdd} onMe={() => setScreen('me')} items={items} />;
-    if (screen === 'shelves-home') return <ShelvesScreen onCat={openCat} onAdd={goAdd} items={items} />;
+    if (screen === 'home')         return <HomeFeedDiary onCat={openCat} onItem={openItem} onAdd={goAdd} onMe={() => setScreen('me')} onFriends={goFriends} items={items} />;
+    if (screen === 'shelves-home') return <ShelvesScreen onCat={openCat} onAdd={goAdd} onLists={goLists} items={items} />;
     if (screen === 'shelves')      return <CategoryScreen catKey={catKey} onBack={goBack} onItem={openItem} onAdd={goAdd} items={items} />;
     if (screen === 'detail')       return <DetailScreen item={item || FEED[0]} onBack={goBack} onAdd={goAdd} />;
     if (screen === 'search')       return <UniversalSearchScreen onBack={goBack} onItem={openItem} onAdd={goAdd} items={items} />;
-    if (screen === 'me')           return <ProfileScreen onAdd={goAdd} onSettings={() => setScreen('settings')} items={items} />;
+    if (screen === 'me')           return <ProfileScreen onAdd={goAdd} onSettings={() => setScreen('settings')} onGoals={goGoals} items={items} />;
     if (screen === 'settings')     return <SettingsScreen onBack={goBack} />;
-    return <HomeFeedDiary onCat={openCat} onItem={openItem} onAdd={goAdd} items={items} />;
+    if (screen === 'goals')        return <GoalsScreen onBack={goBack} />;
+    if (screen === 'friends')      return <FriendsActivityScreen onBack={goBack} onAdd={goAdd} />;
+    if (screen === 'lists')        return <ListsHubScreen onBack={goBack} onList={openList} onAdd={goAdd} />;
+    if (screen === 'list-detail')  return <ListDetailScreen list={selectedList} onBack={goBack} onAdd={goAdd} />;
+    return <HomeFeedDiary onCat={openCat} onItem={openItem} onAdd={goAdd} onMe={() => setScreen('me')} items={items} />;
   };
 
   const activeTab = screen === 'home' ? 'home' : screen === 'shelves' || screen === 'shelves-home' ? 'shelves' : screen === 'search' ? 'search' : screen === 'me' ? 'me' : 'home';
@@ -184,7 +194,8 @@ function TroveApp() {
     <div style={{ width: '100%', height: '100%', background: T.bg, position: 'relative', overflow: 'hidden' }}>
       {renderScreen()}
 
-      {screen !== 'detail' && screen !== 'settings' && (
+      {/* Nav overlay so tab bar works from detail/search screens */}
+      {!['detail','settings','goals','friends','lists','list-detail'].includes(screen) && (
         <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 40, pointerEvents: 'none' }}>
           <div style={{ pointerEvents: 'auto' }}>
             <TabBar active={activeTab} onNav={k => {

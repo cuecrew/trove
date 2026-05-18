@@ -1,5 +1,5 @@
 // ── Home Feed (Diary) ────────────────────────────────────────────────────────
-function HomeFeedDiary({ onCat, onItem, onAdd, onMe, items }) {
+function HomeFeedDiary({ onCat, onItem, onAdd, onMe, onFriends, items }) {
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const now = new Date();
@@ -32,8 +32,11 @@ function HomeFeedDiary({ onCat, onItem, onAdd, onMe, items }) {
               {now.getHours() < 12 ? 'Morning' : now.getHours() < 17 ? 'Afternoon' : 'Evening'}, you
             </div>
           </div>
-          <div onClick={onMe} style={{ width: 38, height: 38, borderRadius: 19, background: T.surface2, border: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            <span style={{ fontFamily: '"Bricolage Grotesque"', fontWeight: 700, color: T.brand, fontSize: 14 }}>T</span>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {onFriends && <button onClick={onFriends} style={{ padding: '7px 14px', borderRadius: 999, background: T.surface, border: `1px solid ${T.border}`, cursor: 'pointer', fontFamily: '"Geist"', fontSize: 12, fontWeight: 600, color: T.textDim }}>Friends</button>}
+            <div onClick={onMe} style={{ width: 38, height: 38, borderRadius: 19, background: T.surface2, border: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <span style={{ fontFamily: '"Bricolage Grotesque"', fontWeight: 700, color: T.brand, fontSize: 14 }}>T</span>
+            </div>
           </div>
         </div>
 
@@ -225,7 +228,7 @@ function CategoryScreen({ catKey, onBack, onItem, onAdd, items }) {
 }
 
 // ── Shelves (category grid) ──────────────────────────────────────────────────
-function ShelvesScreen({ onCat, onAdd, items }) {
+function ShelvesScreen({ onCat, onAdd, onLists, items }) {
   const counts = {};
   CAT_ORDER.forEach(k => {
     counts[k] = items.filter(it => it.cat === k && it.status !== 'want').length;
@@ -234,8 +237,9 @@ function ShelvesScreen({ onCat, onAdd, items }) {
     <div style={{ height: '100%', background: T.bg, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
       <StatusBar />
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 110 }}>
-        <div style={{ padding: '12px 20px 22px' }}>
+        <div style={{ padding: '12px 20px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ fontFamily: '"Bricolage Grotesque", system-ui', fontWeight: 700, fontSize: 30, color: T.text, letterSpacing: -0.8, fontVariationSettings: '"wdth" 85' }}>Your Shelves</div>
+          {onLists && <button onClick={onLists} style={{ padding: '7px 14px', borderRadius: 999, background: T.surface, border: `1px solid ${T.border}`, cursor: 'pointer', fontFamily: '"Geist"', fontSize: 12, fontWeight: 600, color: T.brand }}>Lists</button>}
         </div>
         <div style={{ padding: '0 20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           {CAT_ORDER.map(k => {
@@ -380,9 +384,12 @@ function ProfileScreen({ onAdd, onSettings, items }) {
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 110 }}>
         <div style={{ padding: '8px 20px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ fontFamily: '"Geist"', fontSize: 13, fontWeight: 600, color: T.textDim }}>@you</div>
-          <button onClick={onSettings} style={{ width: 38, height: 38, borderRadius: 19, background: T.surface, border: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            <Icon name="more" size={18} color={T.textDim} />
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={onGoals} style={{ padding: '7px 14px', borderRadius: 999, background: T.surface, border: `1px solid ${T.border}`, cursor: 'pointer', fontFamily: '"Geist"', fontSize: 12, fontWeight: 600, color: T.brand }}>Goals</button>
+            <button onClick={onSettings} style={{ width: 38, height: 38, borderRadius: 19, background: T.surface, border: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <Icon name="more" size={18} color={T.textDim} />
+            </button>
+          </div>
         </div>
 
         {/* Hero */}
